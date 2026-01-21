@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Student Analytics Performance Dashboard - Advanced academic analytics and insights">
+    <title>Student Analytics Performance Dashboard</title>
+    
+    <!-- Chart.js for data visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Animate.css for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/themes.css">
+    <link rel="stylesheet" href="css/futuristic.css">
+    
+    <!-- Google Fonts for futuristic typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1 class="dashboard-title futuristic-title">
+                    <span class="icon holographic">📊</span>
+                    <span class="title-text">Student Analytics Dashboard</span>
+                    <span class="title-badge">AI-Powered</span>
+                </h1>
+                <p class="dashboard-subtitle">Advanced Performance Analytics & Insights</p>
+                <div class="header-stats">
+                    <span class="stat-item" id="headerStat1">⚡ Real-time</span>
+                    <span class="stat-item" id="headerStat2">🤖 AI-Enhanced</span>
+                    <span class="stat-item" id="headerStat3">🔮 Predictive</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="voiceControlBtn" class="header-btn futuristic-btn" aria-label="Voice Control" title="Voice Control (V)">
+                    <span class="pulse-dot"></span>
+                    <span>🎤</span>
+                </button>
+                <button id="aiInsightsBtn" class="header-btn futuristic-btn" aria-label="AI Insights" title="AI-Powered Insights">
+                    <span class="glow-effect"></span>
+                    <span>🤖</span>
+                </button>
+                <button id="printBtn" class="header-btn futuristic-btn" aria-label="Print report" title="Print Report (Ctrl+P)">
+                    <span>🖨️</span>
+                </button>
+                <button id="helpBtn" class="header-btn futuristic-btn" aria-label="Help" title="Help (?)">
+                    <span>❓</span>
+                </button>
+                <button id="themeToggle" class="theme-toggle futuristic-btn" aria-label="Toggle dark mode" title="Toggle Theme (T)">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="dashboard-container">
+        <!-- Upload Section -->
+        <section class="upload-section" id="uploadSection">
+            <div class="upload-card">
+                <div class="upload-icon">📁</div>
+                <h2>Upload Student Data</h2>
+                <p class="upload-description">
+                    Drag and drop your CSV file here, or click to browse
+                </p>
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept=".csv" hidden>
+                    <div class="upload-placeholder">
+                        <span class="upload-icon-large">📤</span>
+                        <p>Drop CSV file here or <span class="browse-link">browse</span></p>
+                        <small>Supports: Student ID, Name, Subject, Marks, Attendance, Semester, Assessment Type</small>
+                    </div>
+                </div>
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <span id="fileName"></span>
+                    <button id="clearFile" class="clear-btn">✕</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Content (Hidden until data loaded) -->
+        <div class="dashboard-content" id="dashboardContent" style="display: none;">
+            <!-- AI Insights Banner -->
+            <section class="ai-banner" id="aiBanner" style="display: none;">
+                <div class="ai-banner-content">
+                    <div class="ai-icon">🤖</div>
+                    <div class="ai-text">
+                        <h3>AI Analysis Complete</h3>
+                        <p id="aiBannerText">Generating intelligent insights...</p>
+                    </div>
+                    <button class="ai-close" id="closeAiBanner">×</button>
+                </div>
+            </section>
+
+            <!-- Key Metrics Cards -->
+            <section class="metrics-section">
+                <div class="metrics-grid futuristic-grid">
+                    <div class="metric-card futuristic-card" data-tooltip="Total number of student records in the dataset">
+                        <div class="card-glow"></div>
+                        <div class="metric-icon holographic">👥</div>
+                        <div class="metric-content">
+                            <h3 class="metric-label">Total Students</h3>
+                            <p class="metric-value neon-text" id="totalStudents">0</p>
+                            <div class="metric-change" id="totalStudentsChange"></div>
+                            <div class="metric-trend-line"></div>
+                        </div>
+                    </div>
+                    <div class="metric-card futuristic-card" data-tooltip="Average score across all students and subjects">
+                        <div class="card-glow"></div>
+                        <div class="metric-icon holographic">📈</div>
+                        <div class="metric-content">
+                            <h3 class="metric-label">Average Score</h3>
+                            <p class="metric-value neon-text" id="averageScore">0%</p>
+                            <div class="metric-change" id="averageScoreChange"></div>
+                            <div class="metric-trend-line"></div>
+                        </div>
+                    </div>
+                    <div class="metric-card futuristic-card" data-tooltip="Percentage of students scoring 50% or above">
+                        <div class="card-glow"></div>
+                        <div class="metric-icon holographic">✅</div>
+                        <div class="metric-content">
+                            <h3 class="metric-label">Pass Rate</h3>
+                            <p class="metric-value neon-text" id="passRate">0%</p>
+                            <div class="metric-change" id="passRateChange"></div>
+                            <div class="metric-trend-line"></div>
+                        </div>
+                    </div>
+                    <div class="metric-card futuristic-card" data-tooltip="Average attendance percentage across all records">
+                        <div class="card-glow"></div>
+                        <div class="metric-icon holographic">📅</div>
+                        <div class="metric-content">
+                            <h3 class="metric-label">Avg Attendance</h3>
+                            <p class="metric-value neon-text" id="avgAttendance">0%</p>
+                            <div class="metric-change" id="avgAttendanceChange"></div>
+                            <div class="metric-trend-line"></div>
+                        </div>
+                    </div>
+                    <div class="metric-card risk-card futuristic-card" data-tooltip="Students identified as high or medium risk">
+                        <div class="card-glow danger-glow"></div>
+                        <div class="metric-icon holographic pulse">⚠️</div>
+                        <div class="metric-content">
+                            <h3 class="metric-label">At-Risk Students</h3>
+                            <p class="metric-value neon-text danger-neon" id="atRiskCount">0</p>
+                            <div class="metric-change" id="atRiskCountChange"></div>
+                            <div class="metric-trend-line danger-line"></div>
+                        </div>
+                    </div>
+                    <div class="metric-card futuristic-card ai-card" data-tooltip="AI-Predicted Success Rate">
+                        <div class="card-glow ai-glow"></div>
+                        <div class="metric-icon holographic">🔮</div>
+                        <div class="metric-content">
+                            <h3 class="metric-label">Success Probability</h3>
+                            <p class="metric-value neon-text ai-neon" id="successProbability">0%</p>
+                            <div class="metric-change" id="successProbabilityChange"></div>
+                            <div class="metric-trend-line ai-line"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Controls Section -->
+            <section class="controls-section">
+                <div class="controls-grid">
+                    <div class="search-box futuristic-search">
+                        <input type="text" id="searchInput" placeholder="Search by name, ID, or subject... (Press Ctrl+K for commands)" 
+                               aria-label="Search students">
+                        <span class="search-icon">🔍</span>
+                        <button class="search-ai-btn" id="searchAIBtn" title="AI Search Suggestions">
+                            <span>🤖</span>
+                        </button>
+                    </div>
+                    <div class="filter-group">
+                        <select id="subjectFilter" class="filter-select" aria-label="Filter by subject">
+                            <option value="">All Subjects</option>
+                        </select>
+                        <select id="semesterFilter" class="filter-select" aria-label="Filter by semester">
+                            <option value="">All Semesters</option>
+                        </select>
+                        <select id="riskFilter" class="filter-select" aria-label="Filter by risk level">
+                            <option value="">All Risk Levels</option>
+                            <option value="high">High Risk</option>
+                            <option value="medium">Medium Risk</option>
+                            <option value="low">Low Risk</option>
+                            <option value="none">No Risk</option>
+                        </select>
+                    </div>
+                    <div class="sort-group">
+                        <select id="sortSelect" class="filter-select" aria-label="Sort students">
+                            <option value="name-asc">Name (A-Z)</option>
+                            <option value="name-desc">Name (Z-A)</option>
+                            <option value="score-asc">Score (Low-High)</option>
+                            <option value="score-desc">Score (High-Low)</option>
+                            <option value="attendance-asc">Attendance (Low-High)</option>
+                            <option value="attendance-desc">Attendance (High-Low)</option>
+                        </select>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="exportBtn" class="export-btn futuristic-action-btn" title="Export to CSV">
+                            <span class="btn-glow"></span>
+                            <span>📥</span> Export CSV
+                        </button>
+                        <button id="printReportBtn" class="export-btn secondary futuristic-action-btn" title="Print Report">
+                            <span class="btn-glow"></span>
+                            <span>🖨️</span> Print
+                        </button>
+                        <button id="compareBtn" class="export-btn secondary futuristic-action-btn" title="Compare Students">
+                            <span class="btn-glow"></span>
+                            <span>⚖️</span> Compare
+                        </button>
+                        <button id="forecastBtn" class="export-btn secondary futuristic-action-btn" title="Performance Forecast">
+                            <span class="btn-glow"></span>
+                            <span>🔮</span> Forecast
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-section">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3 class="chart-title">Score Distribution</h3>
+                        <canvas id="scoreChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Subject Performance</h3>
+                        <canvas id="subjectChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Semester Trends</h3>
+                        <canvas id="semesterChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Attendance Overview</h3>
+                        <canvas id="attendanceChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Performance Heatmap</h3>
+                        <canvas id="heatmapChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Risk Distribution</h3>
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Students Table Section -->
+            <section class="table-section">
+                <div class="table-header">
+                    <div class="table-header-left">
+                        <h2 class="futuristic-title">Student Performance Data</h2>
+                        <div class="table-stats">
+                            <span class="stat-badge" id="tableCount">0</span>
+                            <span class="stat-label">students displayed</span>
+                        </div>
+                    </div>
+                    <div class="table-actions">
+                        <button id="bulkSelectBtn" class="table-action-btn" title="Bulk Select">
+                            <span>☑️</span> Select
+                        </button>
+                        <button id="tableExportBtn" class="table-action-btn" title="Export Table">
+                            <span>📊</span> Export
+                        </button>
+                        <button id="tableRefreshBtn" class="table-action-btn" title="Refresh">
+                            <span>🔄</span> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container futuristic-table-container">
+                    <div class="table-wrapper">
+                        <table class="students-table futuristic-table" id="studentsTable">
+                            <thead>
+                                <tr>
+                                    <th class="select-col">
+                                        <input type="checkbox" id="selectAll" title="Select All">
+                                    </th>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Subject</th>
+                                    <th>Score</th>
+                                    <th>Attendance</th>
+                                    <th>Semester</th>
+                                    <th>Risk Level</th>
+                                    <th>Trend</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-pagination" id="tablePagination" style="display: none;">
+                        <button id="prevPage" class="pagination-btn">← Previous</button>
+                        <span class="pagination-info">
+                            Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                        </span>
+                        <button id="nextPage" class="pagination-btn">Next →</button>
+                    </div>
+                </div>
+                    <div class="table-empty" id="tableEmpty" style="display: none;">
+                        <div class="empty-icon">📭</div>
+                        <p>No students match your filters</p>
+                        <button class="clear-filters-btn" id="clearFiltersBtn">Clear Filters</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Insights Section -->
+            <section class="insights-section">
+                <div class="section-header-futuristic">
+                    <h2 class="insights-title futuristic-title">
+                        <span class="title-glow">📊</span>
+                        <span>AI-Powered Insights</span>
+                        <span class="ai-badge">AI</span>
+                    </h2>
+                </div>
+                <div class="insights-grid futuristic-grid" id="insightsContainer">
+                    <!-- Populated dynamically -->
+                </div>
+            </section>
+
+            <!-- Performance Forecast Section -->
+            <section class="forecast-section" id="forecastSection" style="display: none;">
+                <div class="section-header-futuristic">
+                    <h2 class="futuristic-title">
+                        <span class="title-glow">🔮</span>
+                        <span>Performance Forecast</span>
+                    </h2>
+                </div>
+                <div class="forecast-container futuristic-card">
+                    <div class="forecast-chart">
+                        <canvas id="forecastChart"></canvas>
+                    </div>
+                    <div class="forecast-insights" id="forecastInsights">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <p id="loadingText">Processing data...</p>
+                <div class="loading-progress">
+                    <div class="loading-progress-bar" id="loadingProgressBar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Toast -->
+        <div class="toast" id="errorToast" role="alert">
+            <span class="toast-icon">⚠️</span>
+            <span class="toast-message" id="toastMessage"></span>
+            <button class="toast-close" aria-label="Close">×</button>
+        </div>
+
+        <!-- Student Detail Modal -->
+        <div class="modal-overlay" id="studentModal" style="display: none;">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h2 id="modalStudentName">Student Details</h2>
+                    <button class="modal-close" id="closeModal" aria-label="Close modal">×</button>
+                </div>
+                <div class="modal-content" id="modalContent">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Modal -->
+        <div class="modal-overlay" id="compareModal" style="display: none;">
+            <div class="modal-container large">
+                <div class="modal-header">
+                    <h2>Compare Students</h2>
+                    <button class="modal-close" id="closeCompareModal" aria-label="Close modal">×</button>
+                </div>
+                <div class="modal-content">
+                    <div class="compare-selector">
+                        <select id="compareStudent1" class="compare-select">
+                            <option value="">Select First Student</option>
+                        </select>
+                        <span class="vs-badge">VS</span>
+                        <select id="compareStudent2" class="compare-select">
+                            <option value="">Select Second Student</option>
+                        </select>
+                    </div>
+                    <div class="compare-results" id="compareResults" style="display: none;">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Modal -->
+        <div class="modal-overlay futuristic-overlay" id="helpModal" style="display: none;">
+            <div class="modal-container futuristic-modal">
+                <div class="modal-header futuristic-header">
+                    <h2 class="futuristic-title">Help & Keyboard Shortcuts</h2>
+                    <button class="modal-close futuristic-close" id="closeHelpModal" aria-label="Close modal">×</button>
+                </div>
+                <div class="modal-content">
+                    <div class="help-section">
+                        <h3>⌨️ Keyboard Shortcuts</h3>
+                        <div class="shortcut-list">
+                            <div class="shortcut-item futuristic-item">
+                                <kbd>Ctrl</kbd> + <kbd>P</kbd>
+                                <span>Print report</span>
+                            </div>
+                            <div class="shortcut-item futuristic-item">
+                                <kbd>T</kbd>
+                                <span>Toggle theme</span>
+                            </div>
+                            <div class="shortcut-item futuristic-item">
+                                <kbd>V</kbd>
+                                <span>Voice control</span>
+                            </div>
+                            <div class="shortcut-item futuristic-item">
+                                <kbd>?</kbd>
+                                <span>Show help</span>
+                            </div>
+                            <div class="shortcut-item futuristic-item">
+                                <kbd>Esc</kbd>
+                                <span>Close modals</span>
+                            </div>
+                            <div class="shortcut-item futuristic-item">
+                                <kbd>Ctrl</kbd> + <kbd>F</kbd>
+                                <span>Focus search</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="help-section">
+                        <h3>📊 Features</h3>
+                        <ul class="help-list">
+                            <li>Upload CSV files with drag & drop or click to browse</li>
+                            <li>View comprehensive analytics and visualizations</li>
+                            <li>Filter and search students by multiple criteria</li>
+                            <li>Export data or print reports</li>
+                            <li>Compare student performance side-by-side</li>
+                            <li>View detailed student information in modal</li>
+                            <li>AI-powered insights and predictions</li>
+                            <li>Performance forecasting</li>
+                            <li>Voice commands for hands-free control</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Insights Modal -->
+        <div class="modal-overlay futuristic-overlay" id="aiInsightsModal" style="display: none;">
+            <div class="modal-container futuristic-modal large">
+                <div class="modal-header futuristic-header">
+                    <h2 class="futuristic-title">
+                        <span class="ai-icon-large">🤖</span>
+                        AI-Powered Analytics
+                    </h2>
+                    <button class="modal-close futuristic-close" id="closeAiModal" aria-label="Close modal">×</button>
+                </div>
+                <div class="modal-content">
+                    <div class="ai-insights-container" id="aiInsightsContainer">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Control Indicator -->
+        <div class="voice-indicator" id="voiceIndicator" style="display: none;">
+            <div class="voice-pulse"></div>
+            <div class="voice-text">🎤 Listening...</div>
+        </div>
+
+        <!-- Data Insights Panel -->
+        <div class="insights-panel" id="insightsPanel" style="display: none;">
+            <div class="panel-header">
+                <h3>💡 Quick Insights</h3>
+                <button class="panel-close" id="closeInsightsPanel">×</button>
+            </div>
+            <div class="panel-content" id="insightsPanelContent">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Notification Center -->
+        <div class="notification-center" id="notificationCenter">
+            <!-- Notifications appear here -->
+        </div>
+
+        <!-- Command Palette -->
+        <div class="command-palette" id="commandPalette" style="display: none;">
+            <div class="palette-header">
+                <input type="text" id="commandInput" placeholder="Type a command or search..." autocomplete="off">
+                <span class="palette-hint">Press Ctrl+K to open</span>
+            </div>
+            <div class="palette-results" id="paletteResults">
+                <!-- Command results -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollToTop" class="scroll-to-top" aria-label="Scroll to top" title="Scroll to top">
+        ↑
+    </button>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer futuristic-footer">
+        <div class="footer-content">
+            <p>Student Analytics Performance Dashboard © 2024</p>
+            <div class="footer-badges">
+                <span class="footer-badge">⚡ Real-time Analytics</span>
+                <span class="footer-badge">🤖 AI-Powered</span>
+                <span class="footer-badge">🔮 Predictive Insights</span>
+                <span class="footer-badge">🎯 Actionable Data</span>
+            </div>
+            <p class="footer-tagline">Built with precision for academic excellence</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Modules -->
+    <script src="js/utils.js"></script>
+    <script src="js/csvParser.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/riskDetection.js"></script>
+    <script src="js/visualizations.js"></script>
+    <script src="js/filters.js"></script>
+    <script src="js/futuristic.js"></script>
+    <script src="js/advanced-features.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
