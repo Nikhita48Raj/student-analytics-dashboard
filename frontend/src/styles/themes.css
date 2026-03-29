@@ -1,0 +1,73 @@
+/* ============================================
+   DARK MODE THEME SYSTEM
+   ============================================ */
+
+/* Dark Mode Variables */
+[data-theme="dark"] {
+    --primary-color: #6366f1;
+    --primary-hover: #818cf8;
+    --secondary-color: #10b981;
+    --danger-color: #f87171;
+    --warning-color: #fbbf24;
+    --success-color: #34d399;
+    
+    --bg-primary: #1e293b;
+    --bg-secondary: #0f172a;
+    --bg-tertiary: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    
+    --border-color: #334155;
+    
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+/* Dark Mode Specific Adjustments */
+[data-theme="dark"] .dashboard-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    border-bottom: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .risk-badge.high {
+    background: #7f1d1d;
+    color: #fecaca;
+}
+
+[data-theme="dark"] .risk-badge.medium {
+    background: #78350f;
+    color: #fde68a;
+}
+
+[data-theme="dark"] .risk-badge.low {
+    background: #1e3a8a;
+    color: #bfdbfe;
+}
+
+[data-theme="dark"] .risk-badge.none {
+    background: #064e3b;
+    color: #a7f3d0;
+}
+
+[data-theme="dark"] .loading-overlay {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+/* Theme Toggle Icon Animation */
+.theme-icon {
+    transition: transform var(--transition-base);
+}
+
+[data-theme="dark"] .theme-icon {
+    transform: rotate(180deg);
+}
+
+/* Smooth Theme Transition */
+* {
+    transition: background-color var(--transition-base),
+                color var(--transition-base),
+                border-color var(--transition-base);
+}
