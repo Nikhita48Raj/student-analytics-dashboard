@@ -1,56 +1,119 @@
-# Student Analytics Performance Dashboard (Full-Stack)
+📊 Student Analytics Dashboard (SIS Nexus)
 
-A comprehensive, production-grade web application for analyzing student performance data through interactive dashboards and advanced analytics. Originally a frontend-only Vanilla JS project, it has now been fully upgraded into a **React** + **Node.js/Express** full-stack application.
+A full-stack Student Information System (SIS) designed for modern educational institutions.
+This platform transforms raw student data (CSV) into actionable, real-time insights with a futuristic and highly interactive UI.
 
-## 🏗️ Project Architecture
+🚀 Features
+🧭 Multi-View Navigation
 
-```
-/
-├── backend/                # Node.js + Express Backend
-│   ├── uploads/            # Temporary directory for CSV uploads
-│   ├── package.json        # Backend dependencies
-│   └── server.js           # Express API server & CSV parser
-│
-├── frontend/               # React + Vite Frontend
-│   ├── index.html          # Main HTML entry
-│   ├── src/                # React source code components & styles
-│   ├── package.json        # Frontend dependencies
-│   └── vite.config.js      # Vite Configuration
-│
-└── legacy/                 # Original Vanilla JS source files (Archived)
-```
+Easily switch between different modules:
 
-## 🚀 Getting Started
+Dashboard
+Students
+Analytics
+Reports
+Admin Panel
+✏️ Full CRUD Functionality
 
-To run the application locally, you will need to start both the backend and frontend servers in separate terminal instances.
+Manage student records directly from the interface:
 
-### 1. Start the Backend
+View student profiles
+Filter records
+Edit details
+Delete entries
+📈 Advanced Analytics
 
-Open a terminal window and execute:
-```bash
+Powerful insights to support decision making:
+
+⏳ Time-series performance tracking
+🔥 Subject vs Semester heatmaps
+⚠️ AI-based risk distribution insights
+📊 Interactive Visualizations
+
+Dynamic charts built with react-chartjs-2:
+
+Bar charts
+Doughnut charts
+Line graphs
+🧾 Report Generation
+
+Generate professional student report cards instantly.
+
+⚡ Global Command Palette
+
+Press Ctrl + K to instantly search for students from anywhere in the app.
+
+📂 Smart CSV Uploads
+
+Drag-and-drop CSV upload with built-in data validation:
+
+Detect missing fields
+Monitor data health
+Instant parsing
+🛠️ Tech Stack
+Frontend
+⚛️ React.js
+⚡ Vite
+📊 Chart.js
+🎨 HTML5
+💎 Vanilla CSS (Glassmorphism + Futuristic UI)
+Backend
+🟢 Node.js
+🚏 Express.js
+📤 Multer (file uploads)
+📑 csv-parser
+Storage
+🧠 In-memory state management
+🔌 Easily extendable to MongoDB / PostgreSQL
+📦 Installation & Setup
+
+![Upload](screenshots/admin.png)
+![Dashboard](screenshots/dashboard.png)
+![Students](screenshots/students.png)
+![Analytics](screenshots/analytics.png)
+![Reports](screenshots/report.png)
+
+Make sure Node.js is installed on your system.
+
+🔗 Download Node.js: https://nodejs.org/
+
+1️⃣ Clone the Repository
+git clone https://github.com/Nikhita48Raj/student-analytics-dashboard.git
+cd student-analytics-dashboard
+2️⃣ Start Backend Server
+
+The backend processes CSV uploads and exposes REST APIs on port 5000.
+
 cd backend
 npm install
 node server.js
-```
-The backend server will run on `http://localhost:5000`.
+3️⃣ Start Frontend Application
 
-### 2. Start the Frontend
+Run the React app using Vite (open a new terminal):
 
-Open a second terminal window and execute:
-```bash
 cd frontend
 npm install
 npm run dev
-```
-The frontend application will be hosted on `http://localhost:5173`. Open this URL in your browser to view the dashboard!
+4️⃣ Open the App
 
-## 🎯 Features Showcase
+Visit:
 
-- **REST API + Multer File Uploads**: Upload CSV data to a real backend, parsed asynchronously and handled properly over an HTTP endpoints (`POST /api/upload`, `GET /api/students`, `GET /api/analytics`).
-- **React Components**: Breaking down the UI cleanly into reusable components (Metrics, Charts, Students Table, Header).
-- **Chart.js Port**: React equivalents for charting (`react-chartjs-2`).
-- **Interactive UI**: Futuristic themed styles ported from the legacy implementation, featuring dark mode toggle via `data-theme` attribute mechanism.
+http://localhost:5173
 
-## 📊 Sample Data
+You can test the upload feature using:
 
-You can find the original schema test data in `legacy/sample-data.csv` to try out the upload component!
+legacy/sample-data.csv
+📁 Project Structure
+student-analytics-dashboard/
+│
+├── frontend/        # React + Vite frontend
+├── backend/         # Express API server
+├── legacy/          # Original vanilla JS version
+└── README.md
+💡 Use Cases
+
+✔ Academic performance monitoring
+✔ Student risk detection
+✔ Institutional analytics dashboards
+✔ Education data visualization projects
+
