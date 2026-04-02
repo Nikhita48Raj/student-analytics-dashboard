@@ -4,6 +4,7 @@ import 'animate.css';
 import './styles/futuristic.css';
 import './styles/styles.css';
 import './styles/themes.css';
+import { API_BASE_URL } from './config';
 
 // Layout & Navigation
 import Sidebar from './components/Sidebar';
@@ -16,30 +17,25 @@ import AnalyticsView from './components/AnalyticsView';
 import ReportsView from './components/ReportsView';
 import AdminView from './components/AdminView';
 
-const API_BASE_URL = 'http://localhost:5000/api';
-
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
   const [dataLoaded, setDataLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [analytics, setAnalytics] = useState(null);
   const [students, setStudents] = useState([]);
-  const [activity, setActivity] = useState([]);
   const [error, setError] = useState(null);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const [studentsRes, analyticsRes, activityRes] = await Promise.all([
+      const [studentsRes, analyticsRes] = await Promise.all([
         axios.get(`${API_BASE_URL}/students`),
-        axios.get(`${API_BASE_URL}/analytics`),
-        axios.get(`${API_BASE_URL}/activity`).catch(() => ({ data: [] }))
+        axios.get(`${API_BASE_URL}/analytics`)
       ]);
 
       setStudents(studentsRes.data.data || studentsRes.data);
       setAnalytics(analyticsRes.data.analytics || analyticsRes.data);
-      setActivity(activityRes.data || []);
       setDataLoaded(true);
     } catch (err) {
       console.error("Failed to fetch dashboard data:", err);
@@ -79,6 +75,8 @@ function App() {
     fetchDashboardData();
   }, []);
 
+  const hasStudents = students.length > 0;
+
   return (
     <div className="app-layout" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-secondary)' }}>
       <Sidebar activeView={activeView} setActiveView={setActiveView} toggleTheme={toggleTheme} />
@@ -103,7 +101,7 @@ function App() {
           </div>
         )}
 
-        {students.length === 0 && !loading && !error && activeView !== 'admin' && (
+        {!hasStudents && !loading && !error && activeView !== 'admin' && (
            <div style={{ textAlign: 'center', marginTop: '10vh' }}>
              <h2 className="futuristic-title">Welcome to SIS Nexus</h2>
              <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Please navigate to the Admin panel to upload a dataset.</p>
@@ -113,19 +111,19 @@ function App() {
            </div>
         )}
 
-        {dataLoaded && students.length > 0 && !loading && (
+        {dataLoaded && !loading && (
           <div className="active-view-container">
-             {activeView === 'dashboard' && <DashboardView analytics={analytics} activityList={activity} />}
-             {activeView === 'students' && <StudentsView students={students} onRefresh={fetchDashboardData} />}
-             {activeView === 'analytics' && <AnalyticsView students={students} />}
-             {activeView === 'reports' && <ReportsView students={students} />}
              {activeView === 'admin' && <AdminView onUpload={handleFileUpload} />}
+             {hasStudents && activeView === 'dashboard' && <DashboardView analytics={analytics} />}
+             {hasStudents && activeView === 'students' && <StudentsView students={students} onRefresh={fetchDashboardData} />}
+             {hasStudents && activeView === 'analytics' && <AnalyticsView students={students} />}
+             {hasStudents && activeView === 'reports' && <ReportsView students={students} />}
           </div>
         )}
       </main>
 
       {/* Global Modals/Overlays */}
-      <CommandPalette students={students} onSelectStudent={(s) => {
+      <CommandPalette students={students} onSelectStudent={() => {
           // If a student is selected via command palette, switch to students view and open their modal
           setActiveView('students');
           // Ideally we would pass the selected student down to StudentsView, 

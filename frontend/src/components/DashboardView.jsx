@@ -2,7 +2,7 @@ import React from 'react';
 import MetricsGrid from './MetricsGrid';
 import InsightsSection from './InsightsSection';
 
-const DashboardView = ({ analytics, activityList }) => {
+const DashboardView = ({ analytics }) => {
   return (
     <div className="dashboard-view animate__animated animate__fadeIn">
       <div className="dashboard-header-inner" style={{ marginBottom: '2rem' }}>

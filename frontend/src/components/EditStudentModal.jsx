@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
+import { getStudentRecordKey } from '../utils/studentRecord';
 
 const EditStudentModal = ({ student, onClose, onRefresh }) => {
   const [formData, setFormData] = useState({ ...student });
@@ -19,7 +21,7 @@ const EditStudentModal = ({ student, onClose, onRefresh }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.put(`http://localhost:5000/api/students/${student.id}`, formData);
+      await axios.put(`${API_BASE_URL}/students/${getStudentRecordKey(student)}`, formData);
       onRefresh();
       onClose();
     } catch (error) {

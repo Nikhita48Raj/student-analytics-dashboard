@@ -17,6 +17,18 @@ const upload = multer({ dest: 'uploads/' });
 // In-memory data store for the dashboard
 let dashboardData = [];
 
+const buildRecordId = (record, rowIndex) =>
+  [record.id, record.subject, record.semester, record.assessmentType, rowIndex].join('::');
+
+const findStudentIndexByIdentifier = (identifier) => {
+  const recordIndex = dashboardData.findIndex((student) => student.recordId === identifier);
+  if (recordIndex !== -1) {
+    return recordIndex;
+  }
+
+  return dashboardData.findIndex((student) => student.id === identifier);
+};
+
 // Helper function to calculate analytics
 const calculateAnalytics = (data) => {
   const totalStudents = data.length;
@@ -74,7 +86,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
       const parsedMarks = parseFloat(data['Marks'] || data['Score'] || data['Grade']);
       const parsedAttendance = parseFloat(data['Attendance'] || data['Attendance Percentage']);
 
-      results.push({
+      const record = {
         id: id,
         name: data['Name'] || data['Student Name'] || `Student ${id}`,
         subject: data['Subject'] || data['Course'] || 'General',
@@ -82,6 +94,11 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
         attendance: isNaN(parsedAttendance) ? 0 : Math.max(0, Math.min(100, parsedAttendance)),
         semester: data['Semester'] || data['Term'] || '1',
         assessmentType: data['Assessment Type'] || data['Assessment'] || 'Exam'
+      };
+
+      results.push({
+        ...record,
+        recordId: buildRecordId(record, results.length)
       });
     })
     .on('end', () => {
@@ -122,7 +139,7 @@ app.put('/api/students/:id', (req, res) => {
   const studentId = req.params.id;
   const updateData = req.body;
   
-  const index = dashboardData.findIndex(s => s.id === studentId);
+  const index = findStudentIndexByIdentifier(studentId);
   if (index === -1) {
     return res.status(404).json({ error: 'Student not found' });
   }
@@ -136,13 +153,13 @@ app.put('/api/students/:id', (req, res) => {
 // Endpoint: Delete Student (DELETE)
 app.delete('/api/students/:id', (req, res) => {
   const studentId = req.params.id;
-  const initialLength = dashboardData.length;
-  
-  dashboardData = dashboardData.filter(s => s.id !== studentId);
-  
-  if (dashboardData.length === initialLength) {
+  const index = findStudentIndexByIdentifier(studentId);
+
+  if (index === -1) {
     return res.status(404).json({ error: 'Student not found' });
   }
+
+  dashboardData.splice(index, 1);
   
   const analytics = calculateAnalytics(dashboardData);
   res.json({ message: 'Student deleted successfully', analytics });

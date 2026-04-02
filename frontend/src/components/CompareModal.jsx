@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import { getStudentOptionLabel, getStudentRecordKey } from '../utils/studentRecord';
 
 const CompareModal = ({ students, onClose }) => {
   const [student1Id, setStudent1Id] = useState('');
   const [student2Id, setStudent2Id] = useState('');
 
-  const s1 = students.find(s => s.id === student1Id);
-  const s2 = students.find(s => s.id === student2Id);
+  const s1 = students.find((student) => getStudentRecordKey(student) === student1Id);
+  const s2 = students.find((student) => getStudentRecordKey(student) === student2Id);
 
   return (
     <div className="modal-overlay" style={{ display: 'flex' }} onClick={onClose}>
@@ -18,12 +19,20 @@ const CompareModal = ({ students, onClose }) => {
           <div className="compare-selector" style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap' }}>
             <select className="filter-select" style={{ flex: 1 }} value={student1Id} onChange={e => setStudent1Id(e.target.value)}>
               <option value="">Select First Student</option>
-              {students.map(s => <option key={`1-${s.id}`} value={s.id}>{s.name} ({s.id})</option>)}
+              {students.map((student) => (
+                <option key={`1-${getStudentRecordKey(student)}`} value={getStudentRecordKey(student)}>
+                  {getStudentOptionLabel(student)}
+                </option>
+              ))}
             </select>
             <span className="vs-badge" style={{ background: 'var(--primary-color)', color: 'white', padding: '0.5rem 1rem', borderRadius: '20px', fontWeight: 'bold' }}>VS</span>
             <select className="filter-select" style={{ flex: 1 }} value={student2Id} onChange={e => setStudent2Id(e.target.value)}>
               <option value="">Select Second Student</option>
-              {students.map(s => <option key={`2-${s.id}`} value={s.id}>{s.name} ({s.id})</option>)}
+              {students.map((student) => (
+                <option key={`2-${getStudentRecordKey(student)}`} value={getStudentRecordKey(student)}>
+                  {getStudentOptionLabel(student)}
+                </option>
+              ))}
             </select>
           </div>
 

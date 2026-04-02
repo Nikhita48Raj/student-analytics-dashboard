@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { getStudentRecordKey } from '../utils/studentRecord';
 
 const StudentsTable = ({ students, onRowClick, onEditClick, onDeleteClick }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,11 +49,12 @@ const StudentsTable = ({ students, onRowClick, onEditClick, onDeleteClick }) => 
   }, [students, searchTerm, subjectFilter, semesterFilter, riskFilter, sortOption]);
 
   const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+  const currentPageNumber = totalPages === 0 ? 1 : Math.min(currentPage, totalPages);
   
   const currentStudents = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
+    const start = (currentPageNumber - 1) * itemsPerPage;
     return filteredStudents.slice(start, start + itemsPerPage);
-  }, [filteredStudents, currentPage]);
+  }, [filteredStudents, currentPageNumber]);
 
   const calculateTrend = (marks) => {
     if (marks >= 80) return 'up';
@@ -142,7 +144,7 @@ const StudentsTable = ({ students, onRowClick, onEditClick, onDeleteClick }) => 
                 const risk = getRiskLevel(student);
                 const trend = calculateTrend(student.marks);
                 return (
-                  <tr key={`${student.id}-${idx}`} onClick={() => onRowClick && onRowClick(student)} style={{ cursor: onRowClick ? 'pointer' : 'default' }}>
+                  <tr key={getStudentRecordKey(student) || `${student.id}-${idx}`} onClick={() => onRowClick && onRowClick(student)} style={{ cursor: onRowClick ? 'pointer' : 'default' }}>
                     <td>{student.id}</td>
                     <td>{student.name}</td>
                     <td>{student.subject}</td>
@@ -162,7 +164,7 @@ const StudentsTable = ({ students, onRowClick, onEditClick, onDeleteClick }) => 
                          title="Edit Record"
                       >✏️</button>
                       <button 
-                         onClick={(e) => { e.stopPropagation(); onDeleteClick && onDeleteClick(student.id); }}
+                         onClick={(e) => { e.stopPropagation(); onDeleteClick && onDeleteClick(student); }}
                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
                          title="Delete Record"
                       >🗑️</button>
@@ -184,18 +186,18 @@ const StudentsTable = ({ students, onRowClick, onEditClick, onDeleteClick }) => 
         {totalPages > 1 && (
           <div className="table-pagination" style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '1rem' }}>
             <button 
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(Math.max(1, currentPageNumber - 1))}
+              disabled={currentPageNumber === 1}
               className="pagination-btn"
             >
               ← Previous
             </button>
-            <span className="pagination-info" style={{ color: 'var(--text-color)' }}>
-              Page <span>{currentPage}</span> of <span>{totalPages}</span>
+            <span className="pagination-info" style={{ color: 'var(--text-primary)' }}>
+              Page <span>{currentPageNumber}</span> of <span>{totalPages}</span>
             </span>
             <button 
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPageNumber + 1))}
+              disabled={currentPageNumber === totalPages}
               className="pagination-btn"
             >
               Next →

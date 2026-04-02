@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getStudentOptionLabel, getStudentRecordKey } from '../utils/studentRecord';
 
 const ReportsView = ({ students }) => {
   const [selectedStudent, setSelectedStudent] = useState('');
@@ -7,7 +8,7 @@ const ReportsView = ({ students }) => {
     window.print();
   };
 
-  const s = students.find(st => st.id === selectedStudent);
+  const s = students.find((student) => getStudentRecordKey(student) === selectedStudent);
 
   return (
     <div className="reports-view animate__animated animate__fadeIn">
@@ -27,7 +28,11 @@ const ReportsView = ({ students }) => {
             onChange={(e) => setSelectedStudent(e.target.value)}
           >
             <option value="">Select Student...</option>
-            {students.map(st => <option key={`rep-${st.id}`} value={st.id}>{st.name} ({st.id})</option>)}
+            {students.map((student) => (
+              <option key={`rep-${getStudentRecordKey(student)}`} value={getStudentRecordKey(student)}>
+                {getStudentOptionLabel(student)}
+              </option>
+            ))}
           </select>
           <button 
             className="futuristic-btn" 

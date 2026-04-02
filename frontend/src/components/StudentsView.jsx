@@ -4,16 +4,17 @@ import StudentsTable from './StudentsTable';
 import StudentModal from './StudentModal';
 import CompareModal from './CompareModal';
 import EditStudentModal from './EditStudentModal';
+import { API_BASE_URL } from '../config';
 
 const StudentsView = ({ students, onRefresh }) => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [editingStudent, setEditingStudent] = useState(null);
   const [showCompare, setShowCompare] = useState(false);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (student) => {
     if (window.confirm('Are you sure you want to delete this record? This action cannot be undone.')) {
       try {
-        await axios.delete(`http://localhost:5000/api/students/${id}`);
+        await axios.delete(`${API_BASE_URL}/students/${student.recordId ?? student.id}`);
         onRefresh();
       } catch (err) {
         console.error("Delete failed", err);

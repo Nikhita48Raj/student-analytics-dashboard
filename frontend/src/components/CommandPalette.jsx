@@ -1,18 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getStudentRecordKey } from '../utils/studentRecord';
 
 const CommandPalette = ({ students, onSelectStudent }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const inputRef = useRef(null);
 
+  const closePalette = () => {
+    setIsOpen(false);
+    setSearch('');
+  };
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setIsOpen((prev) => !prev);
+        if (isOpen) {
+          closePalette();
+        } else {
+          setIsOpen(true);
+        }
       }
       if (e.key === 'Escape' && isOpen) {
-        setIsOpen(false);
+        closePalette();
       }
     };
 
@@ -23,8 +33,6 @@ const CommandPalette = ({ students, onSelectStudent }) => {
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
-    } else {
-      setSearch('');
     }
   }, [isOpen]);
 
@@ -36,7 +44,7 @@ const CommandPalette = ({ students, onSelectStudent }) => {
   ).slice(0, 5);
 
   return (
-    <div className="modal-overlay" style={{ alignItems: 'flex-start', paddingTop: '10vh' }} onClick={() => setIsOpen(false)}>
+    <div className="modal-overlay" style={{ alignItems: 'flex-start', paddingTop: '10vh' }} onClick={closePalette}>
       <div 
         className="command-palette futuristic-modal" 
         onClick={e => e.stopPropagation()}
@@ -57,10 +65,10 @@ const CommandPalette = ({ students, onSelectStudent }) => {
           <div style={{ padding: '0.5rem' }}>
             {results.map(student => (
               <div 
-                key={student.id} 
+                key={getStudentRecordKey(student)} 
                 onClick={() => {
                   onSelectStudent(student);
-                  setIsOpen(false);
+                  closePalette();
                 }}
                 style={{ padding: '1rem', cursor: 'pointer', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'background 0.2s' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-tertiary)'}
