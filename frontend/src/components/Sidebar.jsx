@@ -1,13 +1,29 @@
 import React from 'react';
 
-const Sidebar = ({ activeView, setActiveView, toggleTheme }) => {
-  const menuItems = [
-    { id: 'dashboard', icon: '📊', label: 'Dashboard' },
-    { id: 'students', icon: '👥', label: 'Students' },
-    { id: 'analytics', icon: '📈', label: 'Analytics' },
-    { id: 'reports', icon: '📄', label: 'Reports' },
-    { id: 'admin', icon: '⚙️', label: 'Admin' }
-  ];
+const Sidebar = ({ activeView, setActiveView, toggleTheme, userRole, onLogout }) => {
+  let menuItems = [];
+  
+  if (userRole === 'Admin') {
+    menuItems = [
+      { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+      { id: 'students', icon: '👥', label: 'Students' },
+      { id: 'analytics', icon: '📈', label: 'Analytics' },
+      { id: 'reports', icon: '📄', label: 'Reports' },
+      { id: 'admin', icon: '⚙️', label: 'Administration' },
+      { id: 'audit', icon: '🛡️', label: 'Audit Logs' }
+    ];
+  } else if (userRole === 'Teacher') {
+    menuItems = [
+      { id: 'dashboard', icon: '📊', label: 'Class Dashboard' },
+      { id: 'students', icon: '👥', label: 'My Students' },
+      { id: 'reports', icon: '📄', label: 'Class Reports' }
+    ];
+  } else if (userRole === 'Student') {
+    menuItems = [
+      { id: 'dashboard', icon: '📊', label: 'Personal Dashboard' },
+      { id: 'reports', icon: '📄', label: 'My Reports' }
+    ];
+  }
 
   return (
     <aside className="sidebar futuristic-sidebar" style={{
@@ -61,7 +77,7 @@ const Sidebar = ({ activeView, setActiveView, toggleTheme }) => {
         ))}
       </nav>
 
-      <div className="sidebar-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: 'auto' }}>
+      <div className="sidebar-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         <button 
           onClick={toggleTheme}
           style={{
@@ -82,6 +98,27 @@ const Sidebar = ({ activeView, setActiveView, toggleTheme }) => {
         >
           <span className="theme-icon">🌓</span>
           <span>Toggle Theme</span>
+        </button>
+        <button 
+          onClick={onLogout}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            padding: '1rem',
+            width: '100%',
+            background: 'transparent',
+            color: 'var(--danger-color)',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '1.1rem',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-tertiary)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+        >
+          <span className="logout-icon">🚪</span>
+          <span>Logout</span>
         </button>
       </div>
     </aside>

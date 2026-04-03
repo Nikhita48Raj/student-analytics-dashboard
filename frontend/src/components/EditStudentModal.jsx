@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const EditStudentModal = ({ student, onClose, onRefresh }) => {
+const EditStudentModal = ({ student, onClose, onRefresh, token, userRole }) => {
   const [formData, setFormData] = useState({ ...student });
   const [loading, setLoading] = useState(false);
 
@@ -19,11 +19,14 @@ const EditStudentModal = ({ student, onClose, onRefresh }) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.put(`http://localhost:5000/api/students/${student.id}`, formData);
+      await axios.put(`http://localhost:5000/api/students/${student.id}`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       onRefresh();
       onClose();
     } catch (error) {
       console.error("Failed to update student", error);
+      alert(error.response?.data?.error || "Failed to update record.");
     } finally {
       setLoading(false);
     }
@@ -55,6 +58,12 @@ const EditStudentModal = ({ student, onClose, onRefresh }) => {
               <input type="number" name="attendance" value={formData.attendance} onChange={handleChange} min="0" max="100" style={{ width: '100%', padding: '0.8rem', borderRadius: '5px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }} required />
             </div>
           </div>
+          {userRole === 'Teacher' && (
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Teacher Remarks / Notes</label>
+              <textarea name="remarks" value={formData.remarks || ''} onChange={handleChange} rows="3" style={{ width: '100%', padding: '0.8rem', borderRadius: '5px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', resize: 'vertical' }}></textarea>
+            </div>
+          )}
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
              <button type="button" onClick={onClose} className="futuristic-btn outline" style={{ flex: 1, padding: '10px', background: 'transparent', border: '2px solid var(--border-color)', color: 'var(--text-primary)', borderRadius: '5px', cursor: 'pointer' }}>Cancel</button>
              <button type="submit" className="futuristic-btn" disabled={loading} style={{ flex: 1, padding: '10px', background: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>

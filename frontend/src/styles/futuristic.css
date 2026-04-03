@@ -25,6 +25,17 @@ h1, h2, h3 {
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.18);
     box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.futuristic-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.6);
+}
+
+.futuristic-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(79, 70, 229, 0.5);
 }
 
 [data-theme="dark"] .futuristic-card,
@@ -580,6 +591,18 @@ body::before {
 .loading-spinner {
     border-top-color: #00ffff;
     box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+}
+
+/* Skeleton Loading System */
+.skeleton-loader {
+    animation: skeleton-loading 1.2s linear infinite alternate;
+    border-radius: var(--radius-sm, 4px);
+    opacity: 0.8;
+}
+
+@keyframes skeleton-loading {
+    0% { background-color: rgba(255, 255, 255, 0.05); }
+    100% { background-color: rgba(255, 255, 255, 0.2); }
 }
 
 /* Smooth Transitions */

@@ -10,15 +10,19 @@ import Sidebar from './components/Sidebar';
 import CommandPalette from './components/CommandPalette';
 
 // Views
+import LoginView from './components/LoginView';
 import DashboardView from './components/DashboardView';
 import StudentsView from './components/StudentsView';
 import AnalyticsView from './components/AnalyticsView';
 import ReportsView from './components/ReportsView';
 import AdminView from './components/AdminView';
+import AuditLogView from './components/AuditLogView';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [activeView, setActiveView] = useState('dashboard');
   const [dataLoaded, setDataLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -27,14 +31,41 @@ function App() {
   const [activity, setActivity] = useState([]);
   const [error, setError] = useState(null);
 
+  // Re-establish session if token exists in localStorage (optional, but good UX)
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+    if (storedToken && storedUser) {
+      setToken(storedToken);
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const handleLogin = (loggedUser, authToken) => {
+    setUser(loggedUser);
+    setToken(authToken);
+    localStorage.setItem('token', authToken);
+    localStorage.setItem('user', JSON.stringify(loggedUser));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setActiveView('dashboard');
+  };
+
   const fetchDashboardData = async () => {
+    if (!token) return;
     try {
       setLoading(true);
       setError(null);
+      const headers = { Authorization: `Bearer ${token}` };
       const [studentsRes, analyticsRes, activityRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/students`),
-        axios.get(`${API_BASE_URL}/analytics`),
-        axios.get(`${API_BASE_URL}/activity`).catch(() => ({ data: [] }))
+        axios.get(`${API_BASE_URL}/students`, { headers }),
+        axios.get(`${API_BASE_URL}/analytics`, { headers }),
+        axios.get(`${API_BASE_URL}/activity`, { headers }).catch(() => ({ data: [] }))
       ]);
 
       setStudents(studentsRes.data.data || studentsRes.data);
@@ -43,11 +74,21 @@ function App() {
       setDataLoaded(true);
     } catch (err) {
       console.error("Failed to fetch dashboard data:", err);
-      setError("Unable to connect to the backend server.");
+      if (err.response && err.response.status === 403) {
+        handleLogout();
+      } else {
+        setError("Unable to connect to the backend server.");
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user && token) {
+      fetchDashboardData();
+    }
+  }, [user, token]);
 
   const handleFileUpload = async (file) => {
     setLoading(true);
@@ -57,13 +98,16 @@ function App() {
     
     try {
       await axios.post(`${API_BASE_URL}/upload`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        }
       });
       await fetchDashboardData();
       setActiveView('dashboard');
     } catch (err) {
       console.error('Error uploading file:', err);
-      setError('File upload failed. Ensure the backend server is running and the CSV is appropriately formatted.');
+      setError(err.response?.data?.error || 'File upload failed. Ensure the backend server is running and you have Admin permissions.');
       setLoading(false);
     }
   };
@@ -74,18 +118,29 @@ function App() {
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
-  // On mount, check if there's already data loaded on the server
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  if (!user || !token) {
+    return <LoginView onLogin={handleLogin} />;
+  }
 
   return (
     <div className="app-layout" style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-secondary)' }}>
-      <Sidebar activeView={activeView} setActiveView={setActiveView} toggleTheme={toggleTheme} />
+      <Sidebar 
+        activeView={activeView} 
+        setActiveView={setActiveView} 
+        toggleTheme={toggleTheme} 
+        userRole={user.role} 
+        onLogout={handleLogout} 
+      />
       
       <main className="main-content" style={{ flex: 1, marginLeft: '250px', padding: '2rem', overflowY: 'auto', height: '100vh', width: 'calc(100% - 250px)' }}>
+        
+        {/* Top bar logic for logout/user display */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem', alignItems: 'center', gap: '1rem' }}>
+          <span style={{ color: 'var(--text-secondary)' }}>Logged in as: <strong style={{ color: 'var(--primary-color)' }}>{user.name} ({user.role})</strong></span>
+        </div>
+
         {error && (
-          <div className="error-banner" style={{ background: 'var(--danger-color)', color: 'white', padding: '1rem', borderRadius: '8px', marginBottom: '2rem' }}>
+          <div className="error-banner animate__animated animate__shakeX" style={{ background: 'var(--danger-color)', color: 'white', padding: '1rem', borderRadius: '8px', marginBottom: '2rem' }}>
             {error}
           </div>
         )}
@@ -95,7 +150,7 @@ function App() {
             <div className="spider-web"></div>
             <div className="loading-content">
               <div className="loading-spinner futuristic-spinner"></div>
-              <p>Processing Analytics Data...</p>
+              <p>Processing Intelligence Data...</p>
               <div className="loading-progress futuristic-progress">
                 <div className="loading-progress-bar"></div>
               </div>
@@ -103,33 +158,57 @@ function App() {
           </div>
         )}
 
-        {students.length === 0 && !loading && !error && activeView !== 'admin' && (
+        {students.length === 0 && !loading && !error && activeView !== 'admin' && activeView !== 'audit' && (
            <div style={{ textAlign: 'center', marginTop: '10vh' }}>
-             <h2 className="futuristic-title">Welcome to SIS Nexus</h2>
-             <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Please navigate to the Admin panel to upload a dataset.</p>
-             <button onClick={() => setActiveView('admin')} className="futuristic-btn" style={{ padding: '10px 20px', fontSize: '1.2rem', background: 'var(--primary-color)', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
-                Go to Admin
-             </button>
+             <h2 className="futuristic-title">Welcome to SIS Nexus Intelligence Platform</h2>
+             <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Awaiting initial dataset generation.</p>
+             {user.role === 'Admin' ? (
+                <button onClick={() => setActiveView('admin')} className="futuristic-btn" style={{ padding: '10px 20px', fontSize: '1.2rem', background: 'var(--primary-color)', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
+                   Go to Admin Control
+                </button>
+             ) : (
+                <p style={{ color: 'var(--text-secondary)' }}>Please wait for the System Administrator to initialize the records.</p>
+             )}
            </div>
         )}
 
-        {dataLoaded && students.length > 0 && !loading && (
+        {!loading && !error && activeView === 'admin' && (
+          <div className="active-view-container animate__animated animate__fadeIn">
+            {user.role === 'Admin' ? (
+              <AdminView onUpload={handleFileUpload} onRefresh={fetchDashboardData} />
+            ) : (
+              <div style={{ color: 'var(--danger-color)', textAlign: 'center', padding: '3rem' }}>
+                <h2>ACCESS DENIED</h2>
+                <p>Only Administrators can manage system configurations and dataset operations.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {!loading && !error && activeView === 'audit' && (
+          <div className="active-view-container animate__animated animate__fadeIn">
+             {user.role === 'Admin' ? (
+               <AuditLogView token={token} />
+             ) : (
+               <div style={{ color: 'var(--danger-color)', textAlign: 'center', padding: '3rem' }}>
+                  <h2>ACCESS DENIED</h2>
+               </div>
+             )}
+          </div>
+        )}
+
+        {dataLoaded && students.length > 0 && !loading && activeView !== 'admin' && activeView !== 'audit' && (
           <div className="active-view-container">
-             {activeView === 'dashboard' && <DashboardView analytics={analytics} activityList={activity} />}
-             {activeView === 'students' && <StudentsView students={students} onRefresh={fetchDashboardData} />}
+             {activeView === 'dashboard' && <DashboardView analytics={analytics} activityList={activity} students={students} userRole={user.role} />}
+             {activeView === 'students' && <StudentsView students={students} onRefresh={fetchDashboardData} token={token} userRole={user.role} />}
              {activeView === 'analytics' && <AnalyticsView students={students} />}
-             {activeView === 'reports' && <ReportsView students={students} />}
-             {activeView === 'admin' && <AdminView onUpload={handleFileUpload} />}
+             {activeView === 'reports' && <ReportsView students={students} userRole={user.role} />}
           </div>
         )}
       </main>
 
-      {/* Global Modals/Overlays */}
       <CommandPalette students={students} onSelectStudent={(s) => {
-          // If a student is selected via command palette, switch to students view and open their modal
           setActiveView('students');
-          // Ideally we would pass the selected student down to StudentsView, 
-          // but for simplicity they can find it in the table.
       }} />
     </div>
   );

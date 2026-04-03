@@ -11,7 +11,7 @@ const MetricsGrid = ({ metrics }) => {
           <div className="metric-icon holographic">👥</div>
           <div className="metric-content">
             <h3 className="metric-label">Total Students</h3>
-            <p className="metric-value neon-text">{metrics.totalStudents}</p>
+            <p className="metric-value neon-text">{metrics.totalStudents} <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>active</span></p>
           </div>
         </div>
         
@@ -20,7 +20,10 @@ const MetricsGrid = ({ metrics }) => {
           <div className="metric-icon holographic">📈</div>
           <div className="metric-content">
             <h3 className="metric-label">Average Score</h3>
-            <p className="metric-value neon-text">{metrics.averageScore}%</p>
+            <p className="metric-value neon-text">
+               {metrics.averageScore}% 
+               <span style={{ fontSize: '1.2rem', marginLeft: '5px' }} className={metrics.averageScore >= 60 ? 'forecast-change positive' : 'forecast-change negative'}>{metrics.averageScore >= 60 ? '↑' : '↓'}</span>
+            </p>
           </div>
         </div>
 
@@ -29,7 +32,10 @@ const MetricsGrid = ({ metrics }) => {
           <div className="metric-icon holographic">✅</div>
           <div className="metric-content">
             <h3 className="metric-label">Pass Rate</h3>
-            <p className="metric-value neon-text">{metrics.passRate}%</p>
+            <p className="metric-value neon-text">
+               {metrics.passRate}%
+               <span style={{ fontSize: '1.2rem', marginLeft: '5px' }} className={metrics.passRate >= 60 ? 'forecast-change positive' : 'forecast-change negative'}>{metrics.passRate >= 60 ? '↑' : '↓'}</span>
+            </p>
           </div>
         </div>
 
@@ -38,7 +44,10 @@ const MetricsGrid = ({ metrics }) => {
           <div className="metric-icon holographic">📅</div>
           <div className="metric-content">
             <h3 className="metric-label">Avg Attendance</h3>
-            <p className="metric-value neon-text">{metrics.averageAttendance}%</p>
+            <p className="metric-value neon-text">
+               {metrics.averageAttendance}%
+               <span style={{ fontSize: '1.2rem', marginLeft: '5px' }} className={metrics.averageAttendance >= 75 ? 'forecast-change positive' : 'forecast-change negative'}>{metrics.averageAttendance >= 75 ? '↑' : '↓'}</span>
+            </p>
           </div>
         </div>
 
@@ -47,7 +56,9 @@ const MetricsGrid = ({ metrics }) => {
           <div className="metric-icon holographic pulse">⚠️</div>
           <div className="metric-content">
             <h3 className="metric-label">At-Risk Students</h3>
-            <p className="metric-value neon-text danger-neon">{metrics.atRiskCount}</p>
+            <p className="metric-value neon-text danger-neon">
+               {metrics.atRiskCount}
+            </p>
           </div>
         </div>
       </div>

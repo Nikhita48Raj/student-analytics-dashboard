@@ -13,17 +13,7 @@ const StudentsTable = ({ students, onRowClick, onEditClick, onDeleteClick }) => 
   const semesters = useMemo(() => Array.from(new Set(students.map(s => s.semester))), [students]);
 
   const getRiskLevel = (student) => {
-    const marks = Number(student.marks) || 0;
-    const attendance = Number(student.attendance) || 0;
-    let riskScore = 0;
-    if (marks < 40) riskScore += 0.4;
-    else if (marks < 50) riskScore += 0.2;
-    if (attendance < 60) riskScore += 0.3;
-    
-    if (riskScore >= 0.7) return { level: 'High Risk', class: 'risk-high', id: 'high' };
-    if (riskScore >= 0.4) return { level: 'Medium Risk', class: 'risk-medium', id: 'medium' };
-    if (riskScore >= 0.2) return { level: 'Low Risk', class: 'risk-low', id: 'low' };
-    return { level: 'No Risk', class: 'risk-none', id: 'none' };
+    return student.riskLevel || { level: 'No Risk', class: 'risk-none', id: 'none' };
   };
 
   const filteredStudents = useMemo(() => {
@@ -153,19 +143,26 @@ const StudentsTable = ({ students, onRowClick, onEditClick, onDeleteClick }) => 
                       <span className={`risk-badge ${risk.class}`}>{risk.level}</span>
                     </td>
                     <td>
-                      <span className={`trend-icon ${trend}`}>{trend === 'up' ? '↗️' : trend === 'down' ? '↘️' : '➡️'}</span>
+                      {student.trend === 'Improving' && <span style={{ color: '#00ff88', fontWeight: 'bold' }}>↗️ Improving</span>}
+                      {student.trend === 'Declining' && <span style={{ color: '#ff4444', fontWeight: 'bold' }}>↘️ Declining</span>}
+                      {student.trend === 'Stable' && <span style={{ color: '#aaaaaa', fontWeight: 'bold' }}>➡️ Stable</span>}
+                      {!student.trend && <span style={{ color: '#aaaaaa' }}>--</span>}
                     </td>
                     <td style={{ textAlign: 'right' }}>
-                      <button 
-                         onClick={(e) => { e.stopPropagation(); onEditClick && onEditClick(student); }}
-                         style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.2rem', marginRight: '0.5rem' }}
-                         title="Edit Record"
-                      >✏️</button>
-                      <button 
-                         onClick={(e) => { e.stopPropagation(); onDeleteClick && onDeleteClick(student.id); }}
+                      {onEditClick && (
+                        <button 
+                           onClick={(e) => { e.stopPropagation(); onEditClick(student); }}
+                           style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.2rem', marginRight: '0.5rem' }}
+                           title="Edit Record"
+                        >✏️</button>
+                      )}
+                      {onDeleteClick && (
+                        <button 
+                         onClick={(e) => { e.stopPropagation(); onDeleteClick(student.id); }}
                          style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
                          title="Delete Record"
-                      >🗑️</button>
+                        >🗑️</button>
+                      )}
                     </td>
                   </tr>
                 );

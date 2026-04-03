@@ -5,15 +5,21 @@ import StudentModal from './StudentModal';
 import CompareModal from './CompareModal';
 import EditStudentModal from './EditStudentModal';
 
-const StudentsView = ({ students, onRefresh }) => {
+const StudentsView = ({ students, onRefresh, token, userRole }) => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [editingStudent, setEditingStudent] = useState(null);
   const [showCompare, setShowCompare] = useState(false);
 
   const handleDelete = async (id) => {
+    if (userRole !== 'Admin') {
+      alert('Permission Denied. Only Admins can delete student records.');
+      return;
+    }
     if (window.confirm('Are you sure you want to delete this record? This action cannot be undone.')) {
       try {
-        await axios.delete(`http://localhost:5000/api/students/${id}`);
+        await axios.delete(`http://localhost:5000/api/students/${id}`, {
+           headers: { Authorization: `Bearer ${token}` }
+        });
         onRefresh();
       } catch (err) {
         console.error("Delete failed", err);
@@ -50,14 +56,14 @@ const StudentsView = ({ students, onRefresh }) => {
       <StudentsTable 
          students={students} 
          onRowClick={setSelectedStudent} 
-         onEditClick={setEditingStudent}
-         onDeleteClick={handleDelete}
+         onEditClick={userRole !== 'Student' ? setEditingStudent : null}
+         onDeleteClick={userRole === 'Admin' ? handleDelete : null}
       />
 
       {/* Local Modals */}
       <StudentModal student={selectedStudent} onClose={() => setSelectedStudent(null)} />
       {showCompare && <CompareModal students={students} onClose={() => setShowCompare(false)} />}
-      <EditStudentModal student={editingStudent} onClose={() => setEditingStudent(null)} onRefresh={onRefresh} />
+      <EditStudentModal student={editingStudent} onClose={() => setEditingStudent(null)} onRefresh={onRefresh} token={token} userRole={userRole} />
     </div>
   );
 };

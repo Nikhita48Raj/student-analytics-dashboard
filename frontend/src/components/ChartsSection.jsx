@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -25,11 +25,16 @@ ChartJS.register(
   ArcElement
 );
 
-const ChartsSection = ({ students }) => {
+const ChartsSection = ({ students, hideTitle = false }) => {
+  const [filterSubject, setFilterSubject] = useState(null);
+
+  const activeStudents = useMemo(() => {
+     return filterSubject ? students.filter(s => s.subject === filterSubject) : students;
+  }, [students, filterSubject]);
 
   const scoreData = useMemo(() => {
     const ranges = { '0-20': 0, '21-40': 0, '41-60': 0, '61-80': 0, '81-100': 0 };
-    students.forEach(s => {
+    activeStudents.forEach(s => {
       const score = Number(s.marks) || 0;
       if (score <= 20) ranges['0-20']++;
       else if (score <= 40) ranges['21-40']++;
@@ -50,11 +55,11 @@ const ChartsSection = ({ students }) => {
         },
       ],
     };
-  }, [students]);
+  }, [activeStudents]);
 
   const attendanceData = useMemo(() => {
     const ranges = { '0-50%': 0, '51-70%': 0, '71-85%': 0, '86-100%': 0 };
-    students.forEach(s => {
+    activeStudents.forEach(s => {
       const att = Number(s.attendance) || 0;
       if (att <= 50) ranges['0-50%']++;
       else if (att <= 70) ranges['51-70%']++;
@@ -83,7 +88,7 @@ const ChartsSection = ({ students }) => {
         },
       ],
     };
-  }, [students]);
+  }, [activeStudents]);
 
   const subjectData = useMemo(() => {
     const subjects = {};
@@ -112,7 +117,7 @@ const ChartsSection = ({ students }) => {
 
   const riskData = useMemo(() => {
     const counts = { 'High Risk': 0, 'Medium Risk': 0, 'Low Risk': 0, 'No Risk': 0 };
-    students.forEach(student => {
+    activeStudents.forEach(student => {
       const marks = Number(student.marks) || 0;
       const attendance = Number(student.attendance) || 0;
       let riskScore = 0;
@@ -138,11 +143,11 @@ const ChartsSection = ({ students }) => {
         ]
       }]
     };
-  }, [students]);
+  }, [activeStudents]);
 
   const trendData = useMemo(() => {
     const semesters = {};
-    students.forEach(s => {
+    activeStudents.forEach(s => {
       const sem = s.semester || '1';
       if (!semesters[sem]) semesters[sem] = { total: 0, count: 0 };
       semesters[sem].total += Number(s.marks) || 0;
@@ -168,7 +173,7 @@ const ChartsSection = ({ students }) => {
         }
       ]
     };
-  }, [students]);
+  }, [activeStudents]);
 
   // Generate generic Heatmap Matrix logic
   const heatmapData = useMemo(() => {
@@ -190,8 +195,20 @@ const ChartsSection = ({ students }) => {
   const commonOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
     plugins: {
-      legend: { position: 'top', labels: { color: '#a0aec0' } }
+      legend: { position: 'top', labels: { color: '#a0aec0' } },
+      tooltip: {
+         backgroundColor: 'rgba(15, 23, 42, 0.9)',
+         titleColor: '#00ffff',
+         bodyFont: { size: 14 },
+         padding: 12,
+         borderColor: 'rgba(0, 255, 255, 0.2)',
+         borderWidth: 1
+      }
     },
     scales: {
       y: { grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#a0aec0' } },
@@ -202,11 +219,49 @@ const ChartsSection = ({ students }) => {
   const doughnutOptions = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { position: 'right', labels: { color: '#a0aec0' } } }
+    plugins: { 
+       legend: { position: 'right', labels: { color: '#a0aec0' } },
+       tooltip: {
+         backgroundColor: 'rgba(15, 23, 42, 0.9)',
+         titleColor: '#00ffff',
+         padding: 12,
+         borderColor: 'rgba(0, 255, 255, 0.2)',
+         borderWidth: 1,
+         callbacks: {
+           label: function(context) { return ` ${context.label}: ${context.raw} Students`; }
+         }
+       }
+    }
+  };
+
+  const subjectOptions = {
+     ...commonOptions,
+     onClick: (event, elements) => {
+       if (elements && elements.length > 0) {
+         const index = elements[0].index;
+         const sub = subjectData.labels[index];
+         setFilterSubject(filterSubject === sub ? null : sub);
+       }
+     },
+     plugins: {
+        ...commonOptions.plugins,
+        tooltip: {
+           ...commonOptions.plugins.tooltip,
+           callbacks: {
+              footer: () => 'Click to filter dashboard by this subject'
+           }
+        }
+     }
   };
 
   return (
     <section className="charts-section animate__animated animate__fadeIn">
+      {!hideTitle && filterSubject && (
+         <div style={{ marginBottom: '1rem', background: 'rgba(0,255,255,0.1)', border: '1px solid #00ffff', padding: '0.8rem', borderRadius: '8px', display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: '#00ffff' }}><strong>Smart Cross-Filtering Active:</strong> Displaying data isolating {filterSubject}.</span>
+            <button onClick={() => setFilterSubject(null)} style={{ background: 'transparent', color: 'white', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Clear Filter</button>
+         </div>
+      )}
       <div className="charts-grid">
         <div className="chart-card">
           <h3 className="chart-title">Score Distribution</h3>
@@ -214,7 +269,7 @@ const ChartsSection = ({ students }) => {
         </div>
         <div className="chart-card">
           <h3 className="chart-title">Subject Performance</h3>
-          <div style={{ height: '300px' }}><Bar data={subjectData} options={commonOptions} /></div>
+          <div style={{ height: '300px' }}><Bar data={subjectData} options={subjectOptions} /></div>
         </div>
         <div className="chart-card">
           <h3 className="chart-title">Attendance Overview</h3>
